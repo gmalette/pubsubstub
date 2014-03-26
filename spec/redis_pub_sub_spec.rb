@@ -1,11 +1,6 @@
 require 'spec_helper'
 
 describe Pubsubstub::RedisPubSub do
-  class Extendable
-    extend Pubsubstub::RedisPubSub
-  end
-
-  subject { Extendable }
 
   it "opens different connections for #pub and #sub" do
     expect(subject.pub).not_to be == (subject.sub)
