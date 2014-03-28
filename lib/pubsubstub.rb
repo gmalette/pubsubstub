@@ -9,8 +9,7 @@ module Pubsubstub
 
   class Application < Sinatra::Base
     def initialize
-      @pubsub = RedisPubSub.new
-      @channels = Hash.new { |k, h| h[k] = Channel.new(k, @pubsub) }
+      @channels = Hash.new { |k, h| h[k] = Channel.new(k) }
       super
     end
 

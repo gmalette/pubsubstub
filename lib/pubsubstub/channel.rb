@@ -1,10 +1,10 @@
 module Pubsubstub
   class Channel
-    attr_reader :name
+    attr_reader :name, :pubsub
 
-    def initialize(name, pubsub)
+    def initialize(name)
       @name = name
-      @pubsub = pubsub
+      @pubsub = RedisPubSub.new(name)
       @connections = []
     end
 
@@ -35,11 +35,11 @@ module Pubsubstub
     end
 
     def listen
-      @pubsub.subscribe(name, method(:broadcast))
+      pubsub.subscribe(method(:broadcast))
     end
 
     def stop_listening
-      @pubsub.unsubscribe(name, method(:broadcast))
+      pubsub.unsubscribe(method(:broadcast))
     end
   end
 end

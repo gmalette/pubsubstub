@@ -1,13 +1,14 @@
 require 'spec_helper'
 
 describe Pubsubstub::Channel do
-  let(:pubsub) { double('RedisPubSub', publish: true, subscribe: true, unsubscribe: true) }
-  subject { Pubsubstub::Channel.new("test", pubsub) }
+  let(:pubsub) { double(Pubsubstub::RedisPubSub, publish: true, subscribe: true, unsubscribe: true) }
+  subject { Pubsubstub::Channel.new("test") }
+  before { allow(subject).to receive(:pubsub) { pubsub } }
 
   context "#initialize" do
     it "does not subscribe immediately" do
       expect(pubsub).not_to receive(:subscribe)
-      Pubsubstub::Channel.new('test', pubsub)
+      Pubsubstub::Channel.new('test')
     end
   end
 

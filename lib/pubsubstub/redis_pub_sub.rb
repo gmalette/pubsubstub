@@ -1,16 +1,42 @@
 module Pubsubstub
   class RedisPubSub
-    def pub
-      @pub ||= redis_connection
+    def initialize(channel_name)
+      @channel_name = channel_name
     end
 
-    def sub
-      @sub ||= redis_connection
+    def subscribe(callback)
+      RedisPubSub.sub.subscribe(key('pubsub'), callback)
     end
 
-    private
-    def redis_connection
-      EM::Hiredis.connect(ENV['REDIS_URL'] || "redis://localhost:6379")
+    def unsubscribe(callback)
+    end
+
+    def publish(event)
+      RedisPubSub.pub.publish(key('pubsub'), event.to_json)
+      RedisPubSub.redis.zadd(key('scrollback'), event.id, event.to_json)
+    end
+
+    protected
+    def key(purpose)
+      [@channel_name, purpose].join(".")
+    end
+
+    class << self
+      def redis
+        @redis ||= redis_connection
+      end
+
+      def pub
+        @pub ||= redis.pubsub
+      end
+
+      def sub
+        @sub ||= redis_connection.pubsub
+      end
+
+      def redis_connection
+        EM::Hiredis.connect(ENV['REDIS_URL'] || "redis://localhost:6379")
+      end
     end
   end
 end
