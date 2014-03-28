@@ -25,13 +25,15 @@ module Pubsubstub
 
     def publish(event)
       # logger.debug "[Channel] Publishing to #{@name}"
-      @clients.each do |connection|
-        callback.call(@name, *args)
-      end
+      pubsub.publish(event)
     end
 
     private
-    def broadcast(message)
+    def broadcast(event)
+      string = event.to_message
+      @connections.each do |connection|
+        connection << string
+      end
     end
 
     def listen

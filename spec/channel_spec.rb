@@ -54,8 +54,23 @@ describe Pubsubstub::Channel do
   end
 
   context "#publish" do
+    it "forwards to the pubsub" do
+      event = double('event')
+      expect(pubsub).to receive(:publish).with(event)
+      subject.publish(event)
+    end
   end
 
-  context "broadcasting" do
+  context "broadcasting events from redis" do
+    let(:event) { double('Event', to_message: "event_data", id: 1234) }
+    let(:connection) { double('connection') }
+    before {
+      subject.subscribe(connection)
+    }
+
+    it "sends the events to the clients" do
+      expect(connection).to receive(:<<).with("event_data")
+      subject.send(:broadcast, event)
+    end
   end
 end
