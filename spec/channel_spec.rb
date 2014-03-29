@@ -62,15 +62,15 @@ describe Pubsubstub::Channel do
   end
 
   context "broadcasting events from redis" do
-    let(:event) { double('Event', to_message: "event_data", id: 1234) }
+    let(:event) { Pubsubstub::Event.new(123, "toto", "message") }
     let(:connection) { double('connection') }
     before {
       subject.subscribe(connection)
     }
 
     it "sends the events to the clients" do
-      expect(connection).to receive(:<<).with("event_data")
-      subject.send(:broadcast, event)
+      expect(connection).to receive(:<<).with(event.to_message)
+      subject.send(:broadcast, event.to_json)
     end
   end
 end

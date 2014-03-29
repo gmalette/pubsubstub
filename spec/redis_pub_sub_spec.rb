@@ -37,6 +37,17 @@ describe Pubsubstub::RedisPubSub do
       end
     end
 
+    describe "#unsubscribe" do
+      before {
+        allow(subject.class).to receive(:sub) { pubsub }
+      }
+
+      it "creates a redis sub with the callback" do
+        expect(pubsub).to receive(:unsubscribe_proc).with("test.pubsub", callback)
+        subject.unsubscribe(callback)
+      end
+    end
+
     describe "#publish" do
       let(:redis) { double('redis') }
       let(:event) { double('Event', to_json: "event_data", id: 1234) }

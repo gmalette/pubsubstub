@@ -10,4 +10,9 @@ describe Pubsubstub::Event do
   it "#to_message" do
     expect(subject.to_message).to be == "id: 12345678\nevent: toto\ndata: refresh #1500\ndata: new #1400\n\n"
   end
+
+  it ".from_json" do
+    json = subject.to_json
+    expect(Pubsubstub::Event.from_json(json).to_json).to be == json
+  end
 end
