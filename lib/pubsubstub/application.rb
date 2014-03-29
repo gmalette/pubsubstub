@@ -50,7 +50,7 @@ module Pubsubstub
     end
 
     post '/' do
-      event = Event.new(time_now, params[:event], params[:data])
+      event = Event.new(params[:data], name: params[:event])
       (params[:channels] || [:default]).each do |channel_name|
         channel(channel_name).publish(event)
       end

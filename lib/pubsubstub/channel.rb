@@ -9,7 +9,6 @@ module Pubsubstub
     end
 
     def subscribe(connection, last_event_id: nil)
-      # logger.debug "[Channel] Subscribing #{id} to #{@name}"
       listen if @connections.empty?
       @connections << connection
     end
@@ -24,14 +23,12 @@ module Pubsubstub
     end
 
     def publish(event)
-      # logger.debug "[Channel] Publishing to #{@name}"
       pubsub.publish(event)
     end
 
     private
     def broadcast(json)
       string = Event.from_json(json).to_message
-      puts "Broadcasting to #{@name} - #{@connections.length} clients - #{string.gsub(/\n/, '\n')}"
       @connections.each do |connection|
         connection << string
       end

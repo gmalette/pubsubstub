@@ -2,8 +2,8 @@ module Pubsubstub
   class Event
     attr_reader :id, :name, :data
 
-    def initialize(id, name, data)
-      @id = id
+    def initialize(data, name: nil, id: nil)
+      @id = id || time_now
       @name = name
       @data = data
     end
@@ -22,7 +22,12 @@ module Pubsubstub
 
     def self.from_json(json)
       hash = JSON.load(json)
-      new(hash['id'], hash['name'], hash['data'])
+      new(hash['data'], name: hash['name'], id: hash['id'])
+    end
+
+    private
+    def time_now
+      (Time.now.to_f * 1000).to_i
     end
   end
 end

@@ -62,7 +62,7 @@ describe Pubsubstub::Channel do
   end
 
   context "broadcasting events from redis" do
-    let(:event) { Pubsubstub::Event.new(123, "toto", "message") }
+    let(:event) { Pubsubstub::Event.new("message", name: "toto") }
     let(:connection) { double('connection') }
     before {
       subject.subscribe(connection)
