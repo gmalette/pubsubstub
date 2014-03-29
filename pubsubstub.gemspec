@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Pubsubstub::VERSION
   spec.authors       = ["Guillaume Malette"]
   spec.email         = ["gmalette@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = %q{Pubsubstub is a rack middleware to add Pub/Sub}
+  spec.description   = %q{Pubsubstub can be added to a rack Application or deployed standalone. It uses Redis to do the Pub/Sub}
   spec.homepage      = ""
   spec.license       = "MIT"
 
