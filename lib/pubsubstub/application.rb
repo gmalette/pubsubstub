@@ -13,7 +13,7 @@ module Pubsubstub
 
     def setup_heartbeat
       EM.add_periodic_timer(30) do
-        heartbeat = Event.new(time_now, 'heartbeat', '')
+        heartbeat = Event.new(time_now, 'heartbeat', '').to_message
         @connections.each { |connection| connection << heartbeat }
       end
     end
@@ -28,7 +28,7 @@ module Pubsubstub
 
     get '/', provides: 'text/event-stream' do
       status(200)
-      header({
+      headers({
         'Cache-Control' => 'no-cache',
         'X-Accel-Buffering' => 'no',
         'Connection' => 'keep-alive',
