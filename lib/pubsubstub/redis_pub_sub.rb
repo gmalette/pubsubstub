@@ -9,6 +9,7 @@ module Pubsubstub
     end
 
     def unsubscribe(callback)
+      RedisPubSub.sub.unsubscribe_proc(key('pubsub'), callback)
     end
 
     def publish(event)
