@@ -14,7 +14,10 @@ module Pubsubstub
 
     def to_message
       data = @data.split("\n").map{ |segment| "data: #{segment}" }.join("\n")
-      "id: #{@id}\nevent: #{name}\n#{data}\n\n"
+      message = "id: #{id}" << "\n"
+      message << "event: #{name}" << "\n" if name
+      message << data << "\n\n"
+      message
     end
 
     def self.from_json(json)

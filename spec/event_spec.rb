@@ -7,8 +7,15 @@ describe Pubsubstub::Event do
     expect(subject.to_json).to be == {id: 12345678, name: "toto", data: "refresh #1500\nnew #1400"}.to_json
   end
 
-  it "#to_message" do
-    expect(subject.to_message).to be == "id: 12345678\nevent: toto\ndata: refresh #1500\ndata: new #1400\n\n"
+  context "#to_message" do
+    it "serializes to sse" do
+      expect(subject.to_message).to be == "id: 12345678\nevent: toto\ndata: refresh #1500\ndata: new #1400\n\n"
+    end
+
+    it "does not have event if no name is specified" do
+      event = Pubsubstub::Event.new(1234, nil, "refresh")
+      expect(event.to_message).to be == "id: 1234\ndata: refresh\n\n"
+    end
   end
 
   it ".from_json" do
