@@ -1,6 +1,6 @@
 # Pubsubstub
 
-TODO: Write a gem description
+Pubsubstub is a rack middleware to add Pub/Sub
 
 ## Installation
 
@@ -18,7 +18,19 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Rails
+
+    match "/events", to: Pubsubstub::Application, via: :all
+
+### Standalone
+
+You can easily run Pubsubstub standalone by creating a `config.ru` file containing
+
+    require 'pubsubstub'
+
+    run Pubsubstub::Application
+
+To start the application, run `bundle exec thin start --timeout 0 --max-conns 1024`
 
 ## Contributing
 

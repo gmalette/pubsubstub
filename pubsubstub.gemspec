@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["gmalette@gmail.com"]
   spec.summary       = %q{Pubsubstub is a rack middleware to add Pub/Sub}
   spec.description   = %q{Pubsubstub can be added to a rack Application or deployed standalone. It uses Redis to do the Pub/Sub}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/gmalette/pubsubstub"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
