@@ -4,13 +4,18 @@ describe Pubsubstub::RedisPubSub do
 
   context "class singleton methods" do
     subject { Pubsubstub::RedisPubSub }
-    it "opens different connections for #pub and #sub" do
-      expect(subject.send(:pub)).not_to be == subject.send(:sub)
-    end
 
-    describe "#pub" do
-      it "memoizes the connection" do
-        expect(subject.send(:pub)).to be == subject.send(:pub)
+    describe "#publish" do
+      let(:redis) { double('redis') }
+      let(:event) { double('Event', to_json: "event_data", id: 1234) }
+      before {
+        allow(subject).to receive(:blocking_redis) { redis }
+      }
+
+      it "publishes the event to a redis channel and adds it to the scrollback" do
+        expect(redis).to receive(:publish).with("test.pubsub", event.to_json)
+        expect(redis).to receive(:zadd).with("test.scrollback", event.id, event.to_json)
+        subject.publish("test", event)
       end
     end
 
@@ -49,16 +54,9 @@ describe Pubsubstub::RedisPubSub do
     end
 
     describe "#publish" do
-      let(:redis) { double('redis') }
-      let(:event) { double('Event', to_json: "event_data", id: 1234) }
-      before {
-        allow(subject.class).to receive(:pub) { pubsub }
-        allow(subject.class).to receive(:redis) { redis }
-      }
-
-      it "publishes the event to a redis channel and adds it to the scrollback" do
-        expect(pubsub).to receive(:publish).with("test.pubsub", event.to_json)
-        expect(redis).to receive(:zadd).with("test.scrollback", event.id, event.to_json)
+      let(:event) { Pubsubstub::Event.new("toto") }
+      it "delegates to RedisPubSub.publish" do
+        expect(Pubsubstub::RedisPubSub).to receive(:publish).with("test", event)
         subject.publish(event)
       end
     end

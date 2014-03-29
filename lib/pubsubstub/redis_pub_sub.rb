@@ -23,24 +23,20 @@ module Pubsubstub
 
     class << self
       def publish(channel_name, event)
-        RedisPubSub.pub.publish("#{channel_name}.pubsub", event.to_json)
-        RedisPubSub.redis.zadd("#{channel_name}.scrollback", event.id, event.to_json)
-      end
-
-      def redis
-        @redis ||= redis_connection
-      end
-
-      def pub
-        @pub ||= redis.pubsub
+        blocking_redis.publish("#{channel_name}.pubsub", event.to_json)
+        blocking_redis.zadd("#{channel_name}.scrollback", event.id, event.to_json)
       end
 
       def sub
-        @sub ||= redis_connection.pubsub
+        @sub ||= nonblocking_redis.pubsub
       end
 
-      def redis_connection
-        EM::Hiredis.connect(ENV['REDIS_URL'] || "redis://localhost:6379")
+      def blocking_redis
+        @blocking_redis ||= Redis.new(url: (ENV['REDIS_URL'] || "redis://localhost:6379"))
+      end
+
+      def nonblocking_redis
+        @nonblocking_redis ||= EM::Hiredis.connect(ENV['REDIS_URL'] || "redis://localhost:6379")
       end
     end
   end

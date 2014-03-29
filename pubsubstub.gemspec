@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'sinatra', "~> 1.4"
   spec.add_dependency 'em-hiredis', "~> 0.2"
+  spec.add_dependency 'redis', "~> 3.0"
   spec.add_dependency 'eventmachine', "~> 1.0"
 
   spec.add_development_dependency "bundler", "~> 1.6"
