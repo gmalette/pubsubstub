@@ -8,22 +8,10 @@ module Pubsubstub
       @channels = Hash.new { |h, k| h[k] = Channel.new(k) }
       @connections = []
       super
-      setup_heartbeat
-    end
-
-    def setup_heartbeat
-      EM.add_periodic_timer(30) do
-        heartbeat = Event.new(time_now, 'heartbeat', '').to_message
-        @connections.each { |connection| connection << heartbeat }
-      end
     end
 
     def channel(name)
       @channels[name]
-    end
-
-    def time_now
-      (Time.now.to_f * 1000).to_i
     end
 
     get '/', provides: 'text/event-stream' do
