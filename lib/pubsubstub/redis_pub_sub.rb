@@ -13,8 +13,7 @@ module Pubsubstub
     end
 
     def publish(event)
-      RedisPubSub.pub.publish(key('pubsub'), event.to_json)
-      RedisPubSub.redis.zadd(key('scrollback'), event.id, event.to_json)
+      self.class.publish(@channel_name, event)
     end
 
     protected
@@ -23,6 +22,11 @@ module Pubsubstub
     end
 
     class << self
+      def publish(channel_name, event)
+        RedisPubSub.pub.publish("#{channel_name}.pubsub", event.to_json)
+        RedisPubSub.redis.zadd("#{channel_name}.scrollback", event.id, event.to_json)
+      end
+
       def redis
         @redis ||= redis_connection
       end
