@@ -5,15 +5,23 @@ module Pubsubstub
     end
 
     def subscribe(callback)
-      RedisPubSub.sub.subscribe(key('pubsub'), callback)
+      self.class.sub.subscribe(key('pubsub'), callback)
     end
 
     def unsubscribe(callback)
-      RedisPubSub.sub.unsubscribe_proc(key('pubsub'), callback)
+      self.class.sub.unsubscribe_proc(key('pubsub'), callback)
     end
 
     def publish(event)
       self.class.publish(@channel_name, event)
+    end
+
+    def scrollback(since_event_id)
+      self.class.nonblocking_redis.zrangebyscore(key('scrollback'), "(#{since_event_id.to_i}", '+inf') do |events|
+        events.each do |json|
+          yield Pubsubstub::Event.from_json(json)
+        end
+      end
     end
 
     protected

@@ -25,7 +25,7 @@ module Pubsubstub
         @connections << connection
         channels = params[:channels] || [:default]
         channels.each do |channel_name|
-          channel(channel_name).subscribe(connection, last_event_id: request['HTTP_LAST_EVENT_ID'])
+          channel(channel_name).subscribe(connection, last_event_id: request.env['HTTP_LAST_EVENT_ID'])
         end
 
         connection.callback do

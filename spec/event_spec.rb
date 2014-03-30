@@ -22,4 +22,8 @@ describe Pubsubstub::Event do
     json = subject.to_json
     expect(Pubsubstub::Event.from_json(json).to_json).to be == json
   end
+
+  it "== another event if they are the same" do
+    expect(subject).to be == Pubsubstub::Event.from_json(subject.to_json)
+  end
 end

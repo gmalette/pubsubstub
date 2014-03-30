@@ -11,6 +11,7 @@ module Pubsubstub
     def subscribe(connection, last_event_id: nil)
       listen if @connections.empty?
       @connections << connection
+      scrollback(connection, last_event_id)
     end
 
     def subscribed?(connection)
@@ -27,6 +28,13 @@ module Pubsubstub
     end
 
     private
+    def scrollback(connection, last_event_id)
+      return unless last_event_id
+      pubsub.scrollback(last_event_id) do |event|
+        connection << event.to_message
+      end
+    end
+
     def broadcast(json)
       string = Event.from_json(json).to_message
       @connections.each do |connection|

@@ -29,6 +29,13 @@ describe Pubsubstub::Channel do
       expect(pubsub).not_to receive(:subscribe)
       subject.subscribe(double('connection'))
     end
+
+    it "sends the scrollback if a last_event_id is passed" do
+      event = Pubsubstub::Event.new("event")
+      expect(pubsub).to receive(:scrollback).with(1234).and_yield(event)
+      expect(connection).to receive(:<<).with(event.to_message)
+      subject.subscribe(connection, last_event_id: 1234)
+    end
   end
 
   context "#unsubscribe" do

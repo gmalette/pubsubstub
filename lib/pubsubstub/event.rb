@@ -25,6 +25,10 @@ module Pubsubstub
       new(hash['data'], name: hash['name'], id: hash['id'])
     end
 
+    def ==(other)
+      id == other.id && name == other.name && data == other.data
+    end
+
     private
     def time_now
       (Time.now.to_f * 1000).to_i

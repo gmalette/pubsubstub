@@ -61,4 +61,18 @@ describe Pubsubstub::RedisPubSub do
       end
     end
   end
+
+  describe "#scrollback" do
+    subject { Pubsubstub::RedisPubSub.new("test") }
+
+    let(:event1) { Pubsubstub::Event.new("toto", id: 1235) }
+    let(:event2) { Pubsubstub::Event.new("toto", id: 1236) }
+
+    it "yields the events in the scrollback" do
+      redis = double('redis')
+      expect(redis).to receive(:zrangebyscore).with('test.scrollback', '(1234', '+inf').and_yield([event1.to_json, event2.to_json])
+      expect(Pubsubstub::RedisPubSub).to receive(:nonblocking_redis).and_return(redis)
+      expect { |block| subject.scrollback(1234, &block) }.to yield_successive_args(event1, event2)
+    end
+  end
 end
