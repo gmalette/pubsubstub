@@ -1,4 +1,3 @@
-require 'pry'
 require "json"
 require "sinatra"
 require "em-hiredis"
