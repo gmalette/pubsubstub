@@ -1,5 +1,7 @@
 # Pubsubstub
 
+[![Build Status](https://travis-ci.org/gmalette/pubsubstub.svg?branch=master)](https://travis-ci.org/gmalette/pubsubstub)
+
 Pubsubstub is a rack middleware to add Pub/Sub
 
 ## Installation
