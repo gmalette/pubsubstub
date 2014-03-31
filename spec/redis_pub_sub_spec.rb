@@ -18,12 +18,6 @@ describe Pubsubstub::RedisPubSub do
         subject.publish("test", event)
       end
     end
-
-    describe "#sub" do
-      it "memoizes the connection" do
-        expect(subject.send(:sub)).to be == subject.send(:sub)
-      end
-    end
   end
 
   context "pubsub" do
