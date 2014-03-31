@@ -8,10 +8,10 @@ module Pubsubstub
       @connections = []
     end
 
-    def subscribe(connection, last_event_id: nil)
+    def subscribe(connection, options = {})
       listen if @connections.empty?
       @connections << connection
-      scrollback(connection, last_event_id)
+      scrollback(connection, options[:last_event_id])
     end
 
     def subscribed?(connection)

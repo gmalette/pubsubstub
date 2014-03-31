@@ -2,9 +2,9 @@ module Pubsubstub
   class Event
     attr_reader :id, :name, :data
 
-    def initialize(data, name: nil, id: nil)
-      @id = id || time_now
-      @name = name
+    def initialize(data, options = {})
+      @id = options[:id] || time_now
+      @name = options[:name]
       @data = data
     end
 
