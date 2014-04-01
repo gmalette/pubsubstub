@@ -22,7 +22,20 @@ Or install it yourself as:
 
 ### Rails
 
-    match "/events", to: Pubsubstub::Application, via: :all
+    # The `as: :events` is optional, but will generate a named route for events_path
+    mount Pubsubstub::Application.new, at: "/events", as: :events
+
+You can also cherry-pick actions. For example, if you don't want to publish through HTTP:
+
+    mount Pubsubstub::StreamAction.new, at: "/events", as: :events
+
+This will allow you to mount a publish action in the admin, or leave it out completely.
+
+### Authentication
+
+Need authentication? No problem! Load a Rack middleware in front of Pubsubstub to do the job!
+
+    mount UserRequiredMiddleware.new(Pubsubstub::StreamAction.new), at: "/events", as: :events
 
 ### Standalone
 
