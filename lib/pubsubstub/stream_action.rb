@@ -1,5 +1,10 @@
 module Pubsubstub
   class StreamAction < Pubsubstub::Action
+    def initialize(*)
+      super
+      start_heartbeat
+    end
+
     get '/', provides: 'text/event-stream' do
       status(200)
       headers({
@@ -19,6 +24,16 @@ module Pubsubstub
           channels.each do |channel_name|
             channel(channel_name).unsubscribe(connection)
           end
+        end
+      end
+    end
+
+    private
+    def start_heartbeat
+      @heartbeat = Thread.new do
+        while true
+          sleep 15
+          @connections.each { |connection| connection << "\n" }
         end
       end
     end
