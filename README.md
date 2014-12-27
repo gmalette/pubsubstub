@@ -22,12 +22,16 @@ Or install it yourself as:
 
 ### Rails
 
-    # The `as: :events` is optional, but will generate a named route for events_path
-    mount Pubsubstub::Application.new, at: "/events", as: :events
+```ruby
+# The `as: :events` is optional, but will generate a named route for events_path
+mount Pubsubstub::Application.new, at: "/events", as: :events
+```
 
 You can also cherry-pick actions. For example, if you don't want to publish through HTTP:
 
-    mount Pubsubstub::StreamAction.new, at: "/events", as: :events
+```ruby
+mount Pubsubstub::StreamAction.new, at: "/events", as: :events
+```
 
 This will allow you to mount a publish action in the admin, or leave it out completely.
 
@@ -35,15 +39,27 @@ This will allow you to mount a publish action in the admin, or leave it out comp
 
 Need authentication? No problem! Load a Rack middleware in front of Pubsubstub to do the job!
 
-    mount UserRequiredMiddleware.new(Pubsubstub::StreamAction.new), at: "/events", as: :events
+```ruby
+mount UserRequiredMiddleware.new(Pubsubstub::StreamAction.new), at: "/events", as: :events
+```
 
 ### Standalone
 
 You can easily run Pubsubstub standalone by creating a `config.ru` file containing
 
-    require 'pubsubstub'
+```ruby
+require 'pubsubstub'
 
-    run Pubsubstub::Application
+run Pubsubstub::Application
+```
+
+### Sending an event
+
+```ruby
+payload = user.to_json
+event = Pubsubstub::Event.new(payload, name: "user.update")
+Pubsubstub::RedisPubSub.publish("user.#{user_id}", event)
+```
 
 To start the application, run `bundle exec thin start --timeout 0 --max-conns 1024`
 
