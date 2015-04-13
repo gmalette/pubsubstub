@@ -33,7 +33,8 @@ module Pubsubstub
       @heartbeat = Thread.new do
         loop do
           sleep Pubsubstub.heartbeat_frequency
-          @connections.each { |connection| connection << "\n" }
+          event = Event.new('ping', name: 'heartbeat').to_message
+          @connections.each { |connection| connection << event }
         end
       end
     end
