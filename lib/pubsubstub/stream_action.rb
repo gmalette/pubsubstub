@@ -31,8 +31,8 @@ module Pubsubstub
     private
     def start_heartbeat
       @heartbeat = Thread.new do
-        while true
-          sleep 15
+        loop do
+          sleep Pubsubstub.heartbeat_frequency
           @connections.each { |connection| connection << "\n" }
         end
       end
