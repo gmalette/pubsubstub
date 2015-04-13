@@ -16,7 +16,7 @@ describe Pubsubstub::Channel do
     let(:connection) { double('connection') }
     it "subscribes the client" do
       subject.subscribe(connection)
-      expect(subject.subscribed?(connection)).to be_true
+      expect(subject.subscribed?(connection)).to be true
     end
 
     it "starts subscribing to the channel if it's the first client" do
@@ -43,9 +43,9 @@ describe Pubsubstub::Channel do
     before { subject.subscribe(connection) }
 
     it "unsubscribes the client" do
-      expect(subject.subscribed?(connection)).to be_true
+      expect(subject.subscribed?(connection)).to be true
       subject.unsubscribe(connection)
-      expect(subject.subscribed?(connection)).to be_false
+      expect(subject.subscribed?(connection)).to be false
     end
 
     it "does not stop listening if it's not the last client" do
