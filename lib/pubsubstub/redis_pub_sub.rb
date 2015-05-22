@@ -17,14 +17,21 @@ module Pubsubstub
     end
 
     def scrollback(since_event_id)
-      self.class.nonblocking_redis.zrangebyscore(key('scrollback'), "(#{since_event_id.to_i}", '+inf') do |events|
+      redis = if EventMachine.reactor_running?
+        self.class.nonblocking_redis
+      else
+        self.class.blocking_redis
+      end
+
+      redis.zrangebyscore(key('scrollback'), "(#{since_event_id.to_i}", '+inf') do |events|
         events.each do |json|
           yield Pubsubstub::Event.from_json(json)
         end
       end
     end
 
-    protected
+    private
+
     def key(purpose)
       [@channel_name, purpose].join(".")
     end
@@ -40,11 +47,15 @@ module Pubsubstub
       end
 
       def blocking_redis
-        @blocking_redis ||= Redis.new(url: (ENV['REDIS_URL'] || "redis://localhost:6379"))
+        @blocking_redis ||= Redis.new(url: redis_url)
       end
 
       def nonblocking_redis
-        @nonblocking_redis ||= EM::Hiredis.connect(ENV['REDIS_URL'] || "redis://localhost:6379")
+        @nonblocking_redis ||= EM::Hiredis.connect(redis_url)
+      end
+
+      def redis_url
+        ENV['REDIS_URL'] || "redis://localhost:6379"
       end
     end
   end

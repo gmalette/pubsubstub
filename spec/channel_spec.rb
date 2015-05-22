@@ -80,4 +80,14 @@ describe Pubsubstub::Channel do
       subject.send(:broadcast, event.to_json)
     end
   end
+
+  context "#scrollback" do
+    it "sends events to the connection buffer" do
+      event = Pubsubstub::Event.new("message")
+      expect(pubsub).to receive(:scrollback).and_yield(event)
+      connection = ""
+      subject.scrollback(connection, 1)
+      expect(connection).to eq(event.to_message)
+    end
+  end
 end

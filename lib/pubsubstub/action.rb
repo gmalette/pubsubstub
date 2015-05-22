@@ -4,6 +4,12 @@ module Pubsubstub
       enable :logging
     end
 
+    configure :test do
+      set :dump_errors, false
+      set :raise_errors, true
+      set :show_exceptions, false
+    end
+
     def initialize(*)
       @channels = Hash.new { |h, k| h[k] = Channel.new(k) }
       @connections = []
