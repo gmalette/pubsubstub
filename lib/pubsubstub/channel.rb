@@ -27,13 +27,14 @@ module Pubsubstub
       pubsub.publish(event)
     end
 
-    private
     def scrollback(connection, last_event_id)
       return unless last_event_id
       pubsub.scrollback(last_event_id) do |event|
         connection << event.to_message
       end
     end
+
+    private
 
     def broadcast(json)
       string = Event.from_json(json).to_message
