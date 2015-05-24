@@ -30,4 +30,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "thin", "~> 1.6"
   spec.add_development_dependency "rack-test"
   spec.add_development_dependency "timecop"
+  spec.add_development_dependency "em-spec"
 end

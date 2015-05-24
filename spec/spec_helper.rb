@@ -2,6 +2,7 @@ require 'rack/test'
 require 'pry'
 require 'pry-byebug'
 require 'timecop'
+require 'em-spec/rspec'
 
 ENV['RACK_ENV'] = 'test'
 require_relative '../lib/pubsubstub'
