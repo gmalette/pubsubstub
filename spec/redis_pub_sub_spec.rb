@@ -9,13 +9,29 @@ describe Pubsubstub::RedisPubSub do
       let(:redis) { double('redis') }
       let(:event) { double('Event', to_json: "event_data", id: 1234) }
       before {
-        allow(subject).to receive(:blocking_redis) { redis }
+        allow(redis).to receive(:pipelined).and_yield
       }
 
       it "publishes the event to a redis channel and adds it to the scrollback" do
+        allow(subject).to receive(:blocking_redis) { redis }
         expect(redis).to receive(:publish).with("test.pubsub", event.to_json)
         expect(redis).to receive(:zadd).with("test.scrollback", event.id, event.to_json)
+        expect(redis).to receive(:zremrangebyrank).with("test.scrollback", 0, -1000)
+        expect(redis).to receive(:expire).with("test.scrollback", Pubsubstub::RedisPubSub::EXPIRE_THRESHOLD)
         subject.publish("test", event)
+      end
+
+      it "truncates the scrollback" do
+        count = Pubsubstub::RedisPubSub::EVENT_SCORE_THRESHOLD
+        (1...count).each do |id|
+          event = double(to_json: "event_data #{id}", id: id)
+          subject.publish('test', event)
+        end
+        expect(subject.blocking_redis.zcard("test.scrollback")).to eq(count - 1)
+
+        event = double(to_json: "event_data N", id: count)
+        subject.publish('test', event)
+        expect(subject.blocking_redis.zcard("test.scrollback")).to eq(count - 1)
       end
     end
   end
