@@ -1,5 +1,8 @@
 module Pubsubstub
   class RedisPubSub
+    EVENT_SCORE_THRESHOLD = 1000
+    EXPIRE_THRESHOLD = 24 * 60 * 60
+
     def initialize(channel_name)
       @channel_name = channel_name
     end
@@ -38,8 +41,13 @@ module Pubsubstub
 
     class << self
       def publish(channel_name, event)
-        blocking_redis.publish("#{channel_name}.pubsub", event.to_json)
-        blocking_redis.zadd("#{channel_name}.scrollback", event.id, event.to_json)
+        scrollback = "#{channel_name}.scrollback"
+        blocking_redis.pipelined do
+          blocking_redis.publish("#{channel_name}.pubsub", event.to_json)
+          blocking_redis.zadd(scrollback, event.id, event.to_json)
+          blocking_redis.zremrangebyrank(scrollback, 0, -EVENT_SCORE_THRESHOLD)
+          blocking_redis.expire(scrollback, EXPIRE_THRESHOLD)
+        end
       end
 
       def sub
