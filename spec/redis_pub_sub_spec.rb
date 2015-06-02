@@ -78,11 +78,29 @@ describe Pubsubstub::RedisPubSub do
     let(:event1) { Pubsubstub::Event.new("toto", id: 1235) }
     let(:event2) { Pubsubstub::Event.new("toto", id: 1236) }
 
-    it "yields the events in the scrollback" do
-      redis = double('redis')
-      expect(redis).to receive(:zrangebyscore).with('test.scrollback', '(1234', '+inf').and_yield([event1.to_json, event2.to_json])
-      expect(Pubsubstub::RedisPubSub).to receive(:blocking_redis).and_return(redis)
-      expect { |block| subject.scrollback(1234, &block) }.to yield_successive_args(event1, event2)
+    describe "without EventMachine" do
+      it "yields the events in the scrollback" do
+        redis = double('redis')
+        expect(redis).to receive(:zrangebyscore)
+          .with('test.scrollback', '(1234', '+inf')
+          .and_return([event1.to_json, event2.to_json])
+
+        expect(Pubsubstub::RedisPubSub).to receive(:blocking_redis).and_return(redis)
+        expect { |block| subject.scrollback(1234, &block) }.to yield_successive_args(event1, event2)
+      end
+    end
+
+    describe "with EventMachine" do
+      it "yields the events in the scrollback" do
+        allow(EventMachine).to receive(:reactor_running?).and_return(true)
+        redis = double('redis')
+        expect(redis).to receive(:zrangebyscore)
+          .with('test.scrollback', '(1234', '+inf')
+          .and_yield([event1.to_json, event2.to_json])
+
+        expect(Pubsubstub::RedisPubSub).to receive(:nonblocking_redis).and_return(redis)
+        expect { |block| subject.scrollback(1234, &block) }.to yield_successive_args(event1, event2)
+      end
     end
   end
 end
