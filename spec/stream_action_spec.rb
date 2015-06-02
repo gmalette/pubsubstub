@@ -25,9 +25,10 @@ describe "Pubsubstub::StreamAction without EventMachine" do
 
   it "returns the content of the scrollback" do
     event = Pubsubstub::Event.new("test")
-    expect_any_instance_of(Pubsubstub::Channel).to receive(:scrollback).and_return([event])
+    Pubsubstub::RedisPubSub.publish(:default, event)
 
     get "/", {}, 'HTTP_LAST_EVENT_ID' => 1
+    expect(last_response.body).to eq(event.to_message)
   end
 end
 
@@ -50,10 +51,10 @@ describe "Pubsubstub::StreamAction with EventMachine" do
     end
   end
 
-  it "subscribes the connection to the channel" do
-    event = Pubsubstub::Event.new('ping')
-    channel = Pubsubstub::Channel.new(:default)
-    allow_any_instance_of(Pubsubstub::StreamAction).to receive(:with_each_channel).and_yield(channel)
+  it "returns the content of the scrollback right away" do
+    event = Pubsubstub::Event.new("test")
+    Pubsubstub::RedisPubSub.publish(:default, event)
+    expect_any_instance_of(EventMachine::Hiredis::Client).to receive(:zrangebyscore).and_yield([event.to_json])
 
     em do
       env = current_session.send(:env_for, "/", 'HTTP_LAST_EVENT_ID' => 1)
@@ -61,13 +62,32 @@ describe "Pubsubstub::StreamAction with EventMachine" do
       status, headers, body = app.call(request.env)
 
       response = Rack::MockResponse.new(status, headers, body, env["rack.errors"].flush)
-      channel.send(:broadcast, event.to_json)
 
       EM.next_tick {
         body.close
         response.finish
 
         expect(response.body).to eq(event.to_message)
+        EM.stop
+      }
+    end
+  end
+
+  it "subscribes the connection to the channel" do
+    em do
+      redis = spy('Redis Pubsub')
+      allow(Pubsubstub::RedisPubSub).to receive(:sub).and_return(redis)
+      expect(redis).to receive(:subscribe).with("default.pubsub", anything)
+
+      env = current_session.send(:env_for, "/", 'HTTP_LAST_EVENT_ID' => 1)
+      request = Rack::Request.new(env)
+      status, headers, body = app.call(request.env)
+
+      response = Rack::MockResponse.new(status, headers, body, env["rack.errors"].flush)
+
+      EM.next_tick {
+        body.close
+        response.finish
         EM.stop
       }
     end

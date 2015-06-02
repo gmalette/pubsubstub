@@ -20,20 +20,23 @@ module Pubsubstub
     end
 
     def scrollback(since_event_id)
-      redis = if EventMachine.reactor_running?
-        self.class.nonblocking_redis
-      else
-        self.class.blocking_redis
-      end
-
-      redis.zrangebyscore(key('scrollback'), "(#{since_event_id.to_i}", '+inf') do |events|
-        events.each do |json|
-          yield Pubsubstub::Event.from_json(json)
-        end
+      redis_scrollback(since_event_id) do |json|
+        yield Pubsubstub::Event.from_json(json)
       end
     end
 
     private
+
+    def redis_scrollback(since_event_id, &block)
+      args = [key('scrollback'), "(#{since_event_id.to_i}", '+inf']
+      if EventMachine.reactor_running?
+        self.class.nonblocking_redis.zrangebyscore(*args) do |events|
+          events.each(&block)
+        end
+      else
+        self.class.blocking_redis.zrangebyscore(*args).each(&block)
+      end
+    end
 
     def key(purpose)
       [@channel_name, purpose].join(".")
