@@ -92,4 +92,28 @@ describe "Pubsubstub::StreamAction with EventMachine" do
       }
     end
   end
+
+  it "sends heartbeat events every now and then" do
+    allow(Pubsubstub).to receive(:heartbeat_frequency).and_return(0.001)
+
+    Timecop.freeze do
+      em do
+        env = current_session.send(:env_for, "/", 'HTTP_LAST_EVENT_ID' => 1)
+        request = Rack::Request.new(env)
+        status, headers, body = app.call(request.env)
+
+        response = Rack::MockResponse.new(status, headers, body, env["rack.errors"].flush)
+
+        event = Pubsubstub::Event.new('ping', name: 'heartbeat', retry_after: Pubsubstub::StreamAction::RECONNECT_TIMEOUT)
+
+        EM.add_timer(0.001) {
+          body.close
+          response.finish
+
+          expect(response.body).to eq(event.to_message)
+          EM.stop
+        }
+      end
+    end
+  end
 end

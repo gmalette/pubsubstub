@@ -62,12 +62,11 @@ module Pubsubstub
     end
 
     def start_heartbeat
-      @heartbeat = Thread.new do
-        loop do
-          sleep Pubsubstub.heartbeat_frequency
-          event = heartbeat_frequency.to_message
-          @connections.each { |connection| connection << event }
-        end
+      return unless EventMachine.reactor_running?
+      EventMachine::PeriodicTimer.new(Pubsubstub.heartbeat_frequency) do
+        sleep Pubsubstub.heartbeat_frequency
+        event = heartbeat_event.to_message
+        @connections.each { |connection| connection << event }
       end
     end
 
