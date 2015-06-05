@@ -106,11 +106,11 @@ describe "Pubsubstub::StreamAction with EventMachine" do
 
         event = Pubsubstub::Event.new('ping', name: 'heartbeat', retry_after: Pubsubstub::StreamAction::RECONNECT_TIMEOUT)
 
-        EM.add_timer(0.001) {
+        EM.add_timer(0.002) {
           body.close
           response.finish
 
-          expect(response.body).to eq(event.to_message)
+          expect(response.body).to start_with(event.to_message)
           EM.stop
         }
       end

@@ -4,6 +4,7 @@ module Pubsubstub
 
     def initialize(*)
       super
+      start_heartbeat
     end
 
     get '/', provides: 'text/event-stream' do
@@ -16,7 +17,6 @@ module Pubsubstub
 
       if EventMachine.reactor_running?
         subscribe_connection
-        start_heartbeat
       else
         return_scrollback
       end
@@ -62,10 +62,12 @@ module Pubsubstub
     end
 
     def start_heartbeat
-      return if @timer
-      @timer = EventMachine::PeriodicTimer.new(Pubsubstub.heartbeat_frequency) do
-        event = heartbeat_event.to_message
-        @connections.each { |connection| connection << event }
+      @heartbeat = Thread.new do
+        loop do
+          sleep Pubsubstub.heartbeat_frequency
+          event = heartbeat_event.to_message
+          @connections.each { |connection| connection << event }
+        end
       end
     end
 
