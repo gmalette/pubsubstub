@@ -16,6 +16,9 @@ RSpec.configure do |config|
 
   config.order = 'random'
 
-  config.before(:each) { Pubsubstub::RedisPubSub.blocking_redis.flushdb }
+  config.before(:each) {
+    Pubsubstub.logger = Logger.new('/dev/null')
+    Pubsubstub::RedisPubSub.blocking_redis.flushdb
+  }
 end
 
