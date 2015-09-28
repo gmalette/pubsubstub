@@ -34,6 +34,21 @@ describe Pubsubstub::RedisPubSub do
         expect(subject.blocking_redis.zcard("test.scrollback")).to eq(count - 1)
       end
     end
+
+    describe "#redis_url" do
+      it "uses the fallback url fallback chain" do
+        Pubsubstub.redis_url = "redis://localhost:6379/1"
+        expect(Pubsubstub::RedisPubSub.redis_url).to eq("redis://localhost:6379/1")
+
+        Pubsubstub.redis_url = nil
+        ENV['REDIS_URL'] = "redis://localhost:6379/2"
+        expect(Pubsubstub::RedisPubSub.redis_url).to eq("redis://localhost:6379/2")
+
+        Pubsubstub::RedisPubSub.instance_variable_set(:@blocking_redis, nil)
+        ENV['REDIS_URL'] = nil
+        expect(Pubsubstub::RedisPubSub.redis_url).to eq("redis://localhost:6379/0")
+      end
+    end
   end
 
   context "pubsub" do
