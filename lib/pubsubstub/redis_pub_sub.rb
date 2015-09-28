@@ -58,11 +58,15 @@ module Pubsubstub
       end
 
       def blocking_redis
-        @blocking_redis ||= Redis.new(url: redis_url)
+        return @blocking_redis if @blocking_redis
+        Pubsubstub.logger.info("Connecting blocking_redis to '#{redis_url}'")
+        @blocking_redis = Redis.new(url: redis_url)
       end
 
       def nonblocking_redis
-        @nonblocking_redis ||= EM::Hiredis.connect(redis_url)
+        return @nonblocking_redis if @nonblocking_redis
+        Pubsubstub.logger.info("Connecting nonblocking_redis to '#{redis_url}'")
+        @nonblocking_redis = EM::Hiredis.connect(redis_url)
       end
 
       def redis_url
