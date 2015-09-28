@@ -11,3 +11,10 @@ require "pubsubstub/stream_action"
 require "pubsubstub/publish_action"
 require "pubsubstub/application"
 
+module Pubsubstub
+  class << self
+    attr_accessor :heartbeat_frequency, :redis_url
+  end
+  self.heartbeat_frequency = 15
+end
+
