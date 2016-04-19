@@ -2,7 +2,6 @@ require 'rack/test'
 require 'pry'
 require 'pry-byebug'
 require 'timecop'
-require 'em-spec/rspec'
 
 ENV['RACK_ENV'] = 'test'
 require_relative '../lib/pubsubstub'
@@ -16,6 +15,5 @@ RSpec.configure do |config|
 
   config.order = 'random'
 
-  config.before(:each) { Pubsubstub::RedisPubSub.blocking_redis.flushdb }
+  config.before(:each) { Redis.new(url: Pubsubstub.redis_url).flushdb }
 end
-

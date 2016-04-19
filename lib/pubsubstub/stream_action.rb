@@ -15,25 +15,10 @@ module Pubsubstub
         'Connection' => 'keep-alive',
       })
 
-      if EventMachine.reactor_running?
-        subscribe_connection
-      else
-        return_scrollback
-      end
+      subscribe_connection
     end
 
     private
-
-    def return_scrollback
-      buffer = ''
-      ensure_connection_has_event(buffer)
-
-      with_each_channel do |channel|
-        channel.scrollback(buffer, last_event_id)
-      end
-
-      buffer
-    end
 
     def last_event_id
       request.env['HTTP_LAST_EVENT_ID']

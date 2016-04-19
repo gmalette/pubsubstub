@@ -1,10 +1,6 @@
 require 'spec_helper'
 
 describe "Pubsubstub::StreamAction without EventMachine" do
-  before {
-    allow(EventMachine).to receive(:reactor_running?).and_return(false)
-  }
-
   let(:app) { Pubsubstub::StreamAction.new }
   it "returns a heartbeat if there is no LAST_EVENT_ID" do
     Timecop.freeze(DateTime.parse("2015-01-01T00:00:00+00:00")) do
@@ -33,8 +29,7 @@ describe "Pubsubstub::StreamAction without EventMachine" do
 end
 
 describe "Pubsubstub::StreamAction with EventMachine" do
-  include EventMachine::SpecHelper
-
+  pending("We're getting rid of event machine")
   let(:app) {
     Pubsubstub::StreamAction.new
   }
