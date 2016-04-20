@@ -1,3 +1,4 @@
+require 'mutex_m'
 require "json"
 require "sinatra"
 require "redis"
@@ -10,8 +11,23 @@ require "pubsubstub/publish_action"
 require "pubsubstub/application"
 
 module Pubsubstub
+  extend Mutex_m
+
   class << self
     attr_accessor :heartbeat_frequency, :redis_url, :channels_scrollback_size, :channels_scrollback_ttl
+
+    def redis_url=(url)
+      @url = url.to_s
+      @redis = nil
+    end
+
+    def redis
+      @redis || synchronize { @redis ||= new_redis }
+    end
+
+    def new_redis
+      Redis.new(url: redis_url)
+    end
   end
 
   self.heartbeat_frequency = 15
