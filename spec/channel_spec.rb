@@ -36,26 +36,4 @@ describe Pubsubstub::Channel do
       expect(subject.scrollback(since: 5).map(&:id)).to be == [6, 7, 8, 9]
     end
   end
-
-  describe "#subscribe" do
-    let(:events) { (1..10).map { |i| Pubsubstub::Event.new("refresh ##{i}", id: i) } }
-
-    it "blocks and yield every published events" do
-      subscribe_thread = Thread.start do
-        received_events = []
-        subject.subscribe do |event|
-          received_events << event
-        end
-        received_events
-      end
-
-      expect { subject.subscribed? }.to happen
-
-      events.each(&subject.method(:publish))
-      subject.unsubscribe
-
-      expect(subscribe_thread).to complete
-      expect(subscribe_thread.value).to be == events
-    end
-  end
 end
