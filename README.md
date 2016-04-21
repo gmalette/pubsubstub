@@ -56,12 +56,18 @@ run Pubsubstub::Application
 ### Sending an event
 
 ```ruby
-payload = user.to_json
-event = Pubsubstub::Event.new(payload, name: "user.update")
-Pubsubstub::RedisPubSub.publish("user.#{user_id}", event)
+Pubsubstub.publish("user.#{user.id}", user.to_json, name: "user.update")
 ```
 
-To start the application, run `bundle exec thin start --timeout 0 --max-conns 1024`
+To start the application, run `bundle exec puma config.ru`
+
+### HTTP Server
+
+It is heavilly recommended to deploy Pubsubstub with `puma >= 3.4.0`. As of April 2016, it is the only ruby server that properly handle persistent connections.
+
+Other servers like thin will either require you to set a connection timeout otherwise you won't be able to shutdown the server properly.
+
+See the [/example/puma_config.rb](example puma config) for how to configure puma properly.
 
 ## Contributing
 
