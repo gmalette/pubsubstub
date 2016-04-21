@@ -53,18 +53,26 @@ module Pubsubstub
 
     def start_subscriber
       @subscriber = Thread.start do
-        # TODO: reconnection and error reporting
-        Pubsubstub.subscriber.start
+        Pubsubstub.report_errors do
+          begin
+            Pubsubstub.subscriber.start
+          rescue Redis::BaseConnectionError => error
+            Pubsubstub.logger.error "Can't subscribe to Redis (#{error.class}: #{error.message}). Retrying in 1 second"
+            sleep 1
+            retry
+          end
+        end
       end
     end
 
     def start_heartbeat
       @heartbeat = Thread.new do
-        # TODO: reconnection and error reporting
-        loop do
-          sleep Pubsubstub.heartbeat_frequency
-          event = Pubsubstub.heartbeat_event
-          @subscriptions.each { |subscription| subscription.push(event) }
+        Pubsubstub.report_errors do
+          loop do
+            sleep Pubsubstub.heartbeat_frequency
+            event = Pubsubstub.heartbeat_event
+            @subscriptions.each { |subscription| subscription.push(event) }
+          end
         end
       end
     end
