@@ -23,6 +23,11 @@ module Pubsubstub
     attr_accessor :heartbeat_frequency, :redis_url, :channels_scrollback_size,
       :channels_scrollback_ttl, :logger, :reconnect_timeout, :error_handler
 
+    def publish(channel_name, event)
+      Channel.new(channel_name).publish(event)
+      nil
+    end
+
     def redis_url=(url)
       @url = url.to_s
       @redis = nil
