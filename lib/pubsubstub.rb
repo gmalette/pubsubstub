@@ -29,7 +29,7 @@ module Pubsubstub
     end
 
     def redis_url=(url)
-      @url = url.to_s
+      @redis_url = url.to_s
       @redis = nil
     end
 
