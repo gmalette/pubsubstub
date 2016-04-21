@@ -1,0 +1,3 @@
+#!/bin/bash
+
+puma --config example/puma_config.rb example/config.ru 

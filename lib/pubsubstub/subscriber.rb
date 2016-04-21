@@ -1,5 +1,6 @@
 module Pubsubstub
   class Subscriber
+    include Logging
     include Mutex_m
 
     def initialize
@@ -37,10 +38,12 @@ module Pubsubstub
     def start
       redis.psubscribe(pubsub_pattern) do |on|
         on.psubscribe do
+          info { "Subscribed to #{pubsub_pattern}" }
           @subscribed = true
         end
 
         on.punsubscribe do
+          info { "Unsubscribed from #{pubsub_pattern}" }
           @subscribed = false
         end
 
@@ -48,6 +51,8 @@ module Pubsubstub
           process_message(pubsub_key, message)
         end
       end
+    ensure
+      info { "Terminated" }
     end
 
     def pubsub_pattern
@@ -61,7 +66,9 @@ module Pubsubstub
     end
 
     def dispatch_event(channel_name, event)
-      listeners_for(channel_name).each do |listener|
+      listeners = listeners_for(channel_name)
+      debug { "Dispatching event ##{event.id} from #{channel_name} to #{listeners.size} listeners" }
+      listeners.each do |listener|
         listener.call(event)
       end
     end

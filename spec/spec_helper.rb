@@ -11,6 +11,9 @@ Thread.abort_on_exception = true # ensure no exception stays hidden in threads
 ENV['RACK_ENV'] = 'test'
 require_relative '../lib/pubsubstub'
 
+Pubsubstub.logger = Logger.new(nil)
+Pubsubstub.logger.level = Logger::DEBUG
+
 RSpec.configure do |config|
   config.include Rack::Test::Methods
 

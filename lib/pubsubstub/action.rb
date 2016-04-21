@@ -12,7 +12,6 @@ module Pubsubstub
 
     def initialize(*)
       @channels = Hash.new { |h, k| h[k] = Channel.new(k) }
-      @connections = []
       super
     end
 

@@ -9,7 +9,7 @@ module Pubsubstub
     attr_reader :name
 
     def initialize(name)
-      @name = name
+      @name = name.to_s
     end
 
     def publish(event)
