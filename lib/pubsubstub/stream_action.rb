@@ -5,8 +5,7 @@ module Pubsubstub
     def initialize(*)
       super
       @subscriptions = Set.new
-      start_heartbeat
-      start_subscriber
+      @mutex = Mutex.new
     end
 
     get '/', provides: 'text/event-stream' do
@@ -27,6 +26,9 @@ module Pubsubstub
     end
 
     def subscribe_connection
+      start_heartbeat
+      start_subscriber
+
       stream(:keep_open) do |connection|
         subscription = subscribe(params[:channels] || [:default], connection)
         connection.callback do
@@ -52,26 +54,36 @@ module Pubsubstub
     end
 
     def start_subscriber
-      @subscriber = Thread.start do
-        Pubsubstub.report_errors do
-          begin
-            Pubsubstub.subscriber.start
-          rescue Redis::BaseConnectionError => error
-            Pubsubstub.logger.error "Can't subscribe to Redis (#{error.class}: #{error.message}). Retrying in 1 second"
-            sleep 1
-            retry
+      return if defined?(@subscriber)
+      @mutex.synchronize do
+        return if defined?(@subscriber)
+        @subscriber = Thread.start do
+          Pubsubstub.logger.info "Starting subscriber"
+          Pubsubstub.report_errors do
+            begin
+              Pubsubstub.subscriber.start
+            rescue Redis::BaseConnectionError => error
+              Pubsubstub.logger.error "Can't subscribe to Redis (#{error.class}: #{error.message}). Retrying in 1 second"
+              sleep 1
+              retry
+            end
           end
         end
       end
     end
 
     def start_heartbeat
-      @heartbeat = Thread.new do
-        Pubsubstub.report_errors do
-          loop do
-            sleep Pubsubstub.heartbeat_frequency
-            event = Pubsubstub.heartbeat_event
-            @subscriptions.each { |subscription| subscription.push(event) }
+      return if defined?(@heartbeat)
+      @mutex.synchronize do
+        return if defined?(@heartbeat)
+        @heartbeat = Thread.new do
+          Pubsubstub.logger.info "Starting heartbeat"
+          Pubsubstub.report_errors do
+            loop do
+              sleep Pubsubstub.heartbeat_frequency
+              event = Pubsubstub.heartbeat_event
+              @subscriptions.each { |subscription| subscription.push(event) }
+            end
           end
         end
       end
