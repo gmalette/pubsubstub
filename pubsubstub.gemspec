@@ -26,6 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec", "3.1.0"
   spec.add_development_dependency "pry-byebug"
   spec.add_development_dependency "puma", "~> 3.4"
+  spec.add_development_dependency "thin", "~> 1.6"
   spec.add_development_dependency "rack-test"
   spec.add_development_dependency "timecop"
 end

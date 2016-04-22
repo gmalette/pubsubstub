@@ -4,10 +4,10 @@ module Pubsubstub
 
     attr_reader :channels, :connection, :queue, :id
 
-    def initialize(channel_names, connection)
+    def initialize(channels, connection)
       @id = Random.rand(2 ** 64)
       @connection = connection
-      @channels = channel_names.map { |n| Channel.new(n) }
+      @channels = channels
       @queue = Queue.new
     end
 
@@ -16,12 +16,11 @@ module Pubsubstub
       fetch_scrollback(last_event_id)
       subscribe
       while event = queue.pop
-        debug { "Sending event ##{event.id} "}
+        debug { "Sending event ##{event.id} to client ##{id}"}
         connection << event.to_message
       end
     ensure
       info { "Disconnecting client ##{id}" }
-      @queue = nil
       unsubscribe
     end
 

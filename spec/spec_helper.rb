@@ -14,6 +14,15 @@ require_relative '../lib/pubsubstub'
 Pubsubstub.logger = Logger.new(nil)
 Pubsubstub.logger.level = Logger::DEBUG
 
+# Fake EM
+module EventMachine
+  extend self
+  
+  def reactor_running?
+    false
+  end
+end
+
 RSpec.configure do |config|
   config.include Rack::Test::Methods
 

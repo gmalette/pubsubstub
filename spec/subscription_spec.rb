@@ -3,9 +3,9 @@ require 'spec_helper'
 describe Pubsubstub::Subscription do
   let(:event) { Pubsubstub::Event.new('hello') }
   let(:connection) { [] }
-  let(:channel_names) { %w(foo bar) }
+  let(:channels) { %w(foo bar).map(&Pubsubstub::Channel.method(:new)) }
   let(:channel) { Pubsubstub::Channel.new('foo') }
-  subject { described_class.new(channel_names, connection) }
+  subject { described_class.new(channels, connection) }
 
   it "has an id" do
     expect(subject.id).to be_an Integer
