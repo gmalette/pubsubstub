@@ -29,28 +29,24 @@ module Pubsubstub
       start_heartbeat
       start_subscriber
 
-      stream(:keep_open) do |connection|
-        subscription = subscribe(params[:channels] || [:default], connection)
-        connection.callback do
-          unsubscribe(subscription)
+      stream do |connection|
+        subscription = register(params[:channels] || [:default], connection)
+        begin
+          subscription.stream(last_event_id)
+        ensure
+          release(subscription)
         end
-        subscription.stream(last_event_id)
       end
     end
 
-    def subscribe(*args)
+    def register(*args)
       new_subscription = Subscription.new(*args)
-      @subscriptions << new_subscription
+      @mutex.synchronize { @subscriptions << new_subscription }
       new_subscription
     end
 
-    def unsubscribe(subscription)
-      @subscriptions.delete(subscription)
-    end
-
-    def ensure_connection_has_event(connection)
-      return if last_event_id
-      backlog << heartbeat_event.to_message
+    def release(subscription)
+      @mutex.synchronize { @subscriptions.delete(subscription) }
     end
 
     def start_subscriber
