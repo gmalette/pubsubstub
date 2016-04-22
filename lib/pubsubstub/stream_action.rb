@@ -19,6 +19,12 @@ module Pubsubstub
       subscribe_connection
     end
 
+    def call(*)
+      start_heartbeat
+      start_subscriber
+      super
+    end
+
     private
 
     def last_event_id
@@ -26,9 +32,6 @@ module Pubsubstub
     end
 
     def subscribe_connection
-      start_heartbeat
-      start_subscriber
-
       stream do |connection|
         subscription = register(params[:channels] || [:default], connection)
         begin

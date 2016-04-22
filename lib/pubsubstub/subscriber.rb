@@ -67,7 +67,7 @@ module Pubsubstub
 
     def dispatch_event(channel_name, event)
       listeners = listeners_for(channel_name)
-      debug { "Dispatching event ##{event.id} from #{channel_name} to #{listeners.size} listeners" }
+      info { "Dispatching event ##{event.id} from #{channel_name} to #{listeners.size} listeners" }
       listeners.each do |listener|
         listener.call(event)
       end
