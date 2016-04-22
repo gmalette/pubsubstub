@@ -16,4 +16,4 @@ force_shutdown_after 0
 threads 0, 16
 
 # If you notice your standalone pubsubstub server is starving for CPU, you can run puma in multi-process mode.
-workers 2
+# workers 2

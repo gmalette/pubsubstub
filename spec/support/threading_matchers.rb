@@ -30,3 +30,29 @@ RSpec::Matchers.define :happen do
     @wait_time = seconds
   end
 end
+
+RSpec::Matchers.define :listen do
+  match do |port|
+    start = Time.now.to_f
+    begin
+      connection = TCPSocket.new('localhost', port)
+      true
+    rescue
+      if (Time.now.to_f - start) < @wait_time
+        retry
+      else
+        false
+      end
+    ensure
+      connection.close if connection
+    end
+  end
+
+  chain :in_under do |seconds|
+    @wait_time = seconds
+  end
+
+  failure_message do |port|
+    "expected port #{port} to listen to connection but it didn't"
+  end
+end

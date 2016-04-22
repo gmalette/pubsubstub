@@ -4,3 +4,6 @@ rvm:
 script: rspec spec
 services:
   - redis-server
+
+after_failure:
+  - cat tmp/puma.log
