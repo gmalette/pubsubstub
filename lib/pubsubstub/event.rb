@@ -29,7 +29,7 @@ module Pubsubstub
     private
 
     def build_message
-      data = @data.lines.map{ |segment| "data: #{segment}" }.join("\n".freeze)
+      data = @data.lines.map{ |segment| "data: #{segment}" }.join
       message = "id: #{id}\n"
       message << "event: #{name}\n" if name
       message << "retry: #{retry_after}\n" if retry_after
