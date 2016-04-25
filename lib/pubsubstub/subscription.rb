@@ -13,8 +13,8 @@ module Pubsubstub
 
     def stream(last_event_id)
       info { "Connecting client ##{id} (#{channels.map(&:name).join(', ')})" }
-      fetch_scrollback(last_event_id)
       subscribe
+      fetch_scrollback(last_event_id)
       while event = queue.pop
         debug { "Sending event ##{event.id} to client ##{id}"}
         connection << event.to_message
