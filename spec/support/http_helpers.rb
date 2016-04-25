@@ -1,7 +1,7 @@
 require 'net/http'
 
 module HTTPHelpers
-  def async_get(uri, headers = {}, retries: 3, &block)
+  def async_get(uri, headers = {}, retries: 10, &block)
     uri = URI(uri.to_s)
     queue = Queue.new
     Thread.start do
@@ -18,10 +18,10 @@ module HTTPHelpers
                 queue.push(chunk) unless chunk.empty?
               end
             end
-          rescue Errno::EINVAL # Happen once in a while when the server is not 100% ready
+          rescue Errno::EINVAL, Errno::ECONNREFUSED # Happen once in a while when the server is not 100% ready
             if retries > 0
               retries -= 1
-              sleep 0.2
+              sleep 0.5
               retry
             else
               raise
