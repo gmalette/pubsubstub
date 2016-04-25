@@ -14,12 +14,7 @@ module Pubsubstub
     end
 
     def to_message
-      data = @data.split("\n").map{ |segment| "data: #{segment}" }.join("\n")
-      message = "id: #{id}" << "\n"
-      message << "event: #{name}" << "\n" if name
-      message << "retry: #{retry_after}" << "\n" if retry_after
-      message << data << "\n\n"
-      message
+      @message ||= build_message
     end
 
     def self.from_json(json)
@@ -32,6 +27,15 @@ module Pubsubstub
     end
 
     private
+
+    def build_message
+      data = @data.lines.map{ |segment| "data: #{segment}" }.join
+      message = "id: #{id}\n"
+      message << "event: #{name}\n" if name
+      message << "retry: #{retry_after}\n" if retry_after
+      message << data << "\n\n"
+      message
+    end
 
     def time_now
       (Time.now.to_f * 1000).to_i

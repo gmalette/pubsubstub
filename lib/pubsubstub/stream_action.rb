@@ -1,10 +1,11 @@
 module Pubsubstub
   class StreamAction < Pubsubstub::Action
-    RECONNECT_TIMEOUT = 10_000
+    include Logging
 
     def initialize(*)
       super
-      start_heartbeat
+      @subscriptions = Set.new
+      @mutex = Mutex.new
     end
 
     get '/', provides: 'text/event-stream' do
@@ -15,71 +16,104 @@ module Pubsubstub
         'Connection' => 'keep-alive',
       })
 
-      if EventMachine.reactor_running?
-        subscribe_connection
+      if event_machine?
+        send_scrollback
       else
-        return_scrollback
+        subscribe_connection
       end
+    end
+
+    def call(*)
+      spawn_helper_threads
+      super
     end
 
     private
-
-    def return_scrollback
-      buffer = ''
-      ensure_connection_has_event(buffer)
-
-      with_each_channel do |channel|
-        channel.scrollback(buffer, last_event_id)
-      end
-
-      buffer
-    end
 
     def last_event_id
       request.env['HTTP_LAST_EVENT_ID']
     end
 
-    def subscribe_connection
-      stream(:keep_open) do |connection|
-        @connections << connection
-        ensure_connection_has_event(connection)
-        with_each_channel do |channel|
-          channel.subscribe(connection, last_event_id: last_event_id)
+    def send_scrollback
+      scrollback_events = []
+      scrollback_events = channels.flat_map { |c| c.scrollback(since: last_event_id) } if last_event_id
+      scrollback_events = [Pubsubstub.heartbeat_event] if scrollback_events.empty?
+      stream do |connection|
+        scrollback_events.each do |event|
+          connection << event.to_message
         end
+      end
+    end
 
-        connection.callback do
-          @connections.delete(connection)
-          with_each_channel do |channel|
-            channel.unsubscribe(connection)
+    def event_machine?
+      defined?(EventMachine) && EventMachine.reactor_running?
+    end
+
+    def channels
+      (params[:channels] || [:default]).map(&Channel.method(:new))
+    end
+
+    def subscribe_connection
+      stream do |connection|
+        subscription = register(channels, connection)
+        begin
+          subscription.stream(last_event_id)
+        ensure
+          release(subscription)
+        end
+      end
+    end
+
+    def register(*args)
+      new_subscription = Subscription.new(*args)
+      @mutex.synchronize { @subscriptions << new_subscription }
+      new_subscription
+    end
+
+    def release(subscription)
+      @mutex.synchronize { @subscriptions.delete(subscription) }
+    end
+
+    def spawn_helper_threads
+      return if defined? @helper_threads_initialized
+      @mutex.synchronize do
+        return if defined? @helper_threads_initialized
+        @helper_threads_initialized = true
+        if event_machine?
+          error { "EventMachine is loaded, running in degraded mode :/"}
+        else
+          start_subscriber
+          start_heartbeat
+        end
+      end
+    end
+
+    def start_subscriber
+      Thread.start do
+        info { "Starting subscriber" }
+        Pubsubstub.report_errors do
+          begin
+            Pubsubstub.subscriber.start
+          rescue Redis::BaseConnectionError => error
+            error { "Can't subscribe to Redis (#{error.class}: #{error.message}). Retrying in 1 second" }
+            sleep 1
+            retry
           end
         end
       end
     end
 
-    def ensure_connection_has_event(connection)
-      return if last_event_id
-      connection << heartbeat_event.to_message
-    end
-
     def start_heartbeat
-      @heartbeat = Thread.new do
-        loop do
-          sleep Pubsubstub.heartbeat_frequency
-          event = heartbeat_event.to_message
-          @connections.each { |connection| connection << event }
+      Thread.start do
+        info { "Starting heartbeat" }
+        Pubsubstub.report_errors do
+          loop do
+            sleep Pubsubstub.heartbeat_frequency
+            event = Pubsubstub.heartbeat_event
+            @subscriptions.each { |subscription| subscription.push(event) }
+          end
         end
       end
-    end
-
-    def with_each_channel(&block)
-      channels = params[:channels] || [:default]
-      channels.each do |channel_name|
-        yield channel(channel_name)
-      end
-    end
-
-    def heartbeat_event
-      Event.new('ping', name: 'heartbeat', retry_after: RECONNECT_TIMEOUT)
     end
   end
 end
