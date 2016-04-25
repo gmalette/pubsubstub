@@ -20,6 +20,7 @@ module HTTPHelpers
             end
           rescue Errno::EINVAL # Happen once in a while when the server is not 100% ready
             if retries > 0
+              retries -= 1
               sleep 0.2
               retry
             else
