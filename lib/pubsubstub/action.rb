@@ -9,14 +9,5 @@ module Pubsubstub
       set :raise_errors, true
       set :show_exceptions, false
     end
-
-    def initialize(*)
-      @channels = Hash.new { |h, k| h[k] = Channel.new(k) }
-      super
-    end
-
-    def channel(name)
-      @channels[name]
-    end
   end
 end
