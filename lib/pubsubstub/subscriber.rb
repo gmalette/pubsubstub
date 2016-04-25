@@ -55,6 +55,8 @@ module Pubsubstub
       info { "Terminated" }
     end
 
+    private
+
     def pubsub_pattern
       '*.pubsub'
     end
@@ -72,8 +74,6 @@ module Pubsubstub
         listener.call(event)
       end
     end
-
-    private
 
     def listeners_for(channel_name)
       @listeners.fetch(channel_name) { [] }

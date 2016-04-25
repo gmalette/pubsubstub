@@ -35,7 +35,7 @@ describe Pubsubstub::Subscriber do
       subject.add_event_listener('plop', ->(event) { events_b << event })
       subject.add_event_listener('foo', ->(event) { events_c << event })
 
-      subject.dispatch_event('plop', event)
+      subject.send(:dispatch_event, 'plop', event)
 
       expect(events_a).to be == [event]
       expect(events_b).to be == [event]
