@@ -1,6 +1,9 @@
 language: ruby
 rvm:
   - 2.2.2
+gemfile:
+  - gemfiles/Gemfile.sinatra-1.x
+  - gemfiles/Gemfile.sinatra-2.x
 services:
   - redis-server
 
