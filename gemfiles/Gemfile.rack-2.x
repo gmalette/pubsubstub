@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'sinatra', github: 'sinatra/sinatra', ref: 'a5da6fa82c46436f59ae482d07c1752ab908c852'
+gem 'rack', '~> 2.0'
 gem 'redis', '~> 3.0'
 gem "rspec", "3.1.0"
 gem "pry-byebug"
