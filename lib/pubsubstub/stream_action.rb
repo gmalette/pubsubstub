@@ -1,44 +1,39 @@
 module Pubsubstub
-  class StreamAction < Pubsubstub::Action
+  class StreamAction
+    HEADERS = {
+      'Content-Type' => 'text/event-stream',
+      'Cache-Control' => 'no-cache',
+      'X-Accel-Buffering' => 'no',
+      'Connection' => 'keep-alive',
+    }.freeze
     include Logging
 
     def initialize(*)
-      super
       @subscriptions = Set.new
       @mutex = Mutex.new
     end
 
-    get '/', provides: 'text/event-stream' do
-      status(200)
-      headers({
-        'Cache-Control' => 'no-cache',
-        'X-Accel-Buffering' => 'no',
-        'Connection' => 'keep-alive',
-      })
-
-      if event_machine?
-        send_scrollback
-      else
-        subscribe_connection
-      end
-    end
-
-    def call(*)
+    def call(env)
       spawn_helper_threads
-      super
+      last_event_id = env['HTTP_LAST_EVENT_ID']
+      request = Rack::Request.new(env)
+      channels = (request.params['channels'] || [:default]).map(&Channel.method(:new))
+
+      stream = if event_machine?
+        send_scrollback(channels, last_event_id)
+      else
+        subscribe_connection(channels, last_event_id)
+      end
+      [200, HEADERS, stream]
     end
 
     private
 
-    def last_event_id
-      request.env['HTTP_LAST_EVENT_ID']
-    end
-
-    def send_scrollback
+    def send_scrollback(channels, last_event_id)
       scrollback_events = []
       scrollback_events = channels.flat_map { |c| c.scrollback(since: last_event_id) } if last_event_id
       scrollback_events = [Pubsubstub.heartbeat_event] if scrollback_events.empty?
-      stream do |connection|
+      Stream.new do |connection|
         scrollback_events.each do |event|
           connection << event.to_message
         end
@@ -49,12 +44,8 @@ module Pubsubstub
       defined?(EventMachine) && EventMachine.reactor_running?
     end
 
-    def channels
-      (params[:channels] || [:default]).map(&Channel.method(:new))
-    end
-
-    def subscribe_connection
-      stream do |connection|
+    def subscribe_connection(channels, last_event_id)
+      Stream.new do |connection|
         subscription = register(channels, connection)
         begin
           subscription.stream(last_event_id)
