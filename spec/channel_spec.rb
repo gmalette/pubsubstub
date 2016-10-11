@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Pubsubstub::Channel do
+RSpec.describe Pubsubstub::Channel do
   subject { described_class.new('foobar') }
 
   it "has a name" do

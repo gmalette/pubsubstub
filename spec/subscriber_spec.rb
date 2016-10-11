@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Pubsubstub::Subscriber do
+RSpec.describe Pubsubstub::Subscriber do
   describe "#start" do
     let(:channel) { Pubsubstub::Channel.new('plop') }
     let(:events) { (1..10).map { |i| Pubsubstub::Event.new("refresh ##{i}", id: i) } }
