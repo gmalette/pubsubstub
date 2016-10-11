@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Pubsubstub::Event do
+RSpec.describe Pubsubstub::Event do
   subject {
     Pubsubstub::Event.new("refresh #1500\nnew #1400", id: 12345678, name: "toto", retry_after: 1_000)
   }

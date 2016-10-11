@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Pubsubstub::Subscription do
+RSpec.describe Pubsubstub::Subscription do
   let(:event) { Pubsubstub::Event.new('hello') }
   let(:connection) { [] }
   let(:channels) { %w(foo bar).map(&Pubsubstub::Channel.method(:new)) }

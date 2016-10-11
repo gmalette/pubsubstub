@@ -21,7 +21,8 @@ module Pubsubstub
 
   class << self
     attr_accessor :heartbeat_frequency, :redis_url, :channels_scrollback_size,
-      :channels_scrollback_ttl, :logger, :reconnect_timeout, :error_handler
+      :channels_scrollback_ttl, :logger, :reconnect_timeout, :error_handler,
+      :use_persistent_connections
 
     def publish(channel_name, *args)
       Channel.new(channel_name).publish(Event.new(*args))
@@ -69,6 +70,7 @@ module Pubsubstub
   self.channels_scrollback_size = 1000
   self.channels_scrollback_ttl = 24 * 60 * 60
   self.reconnect_timeout = 10_000
+  self.use_persistent_connections = true
 
   # Deprecated. Use Pubsubstub.publish instead
   module RedisPubSub

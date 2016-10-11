@@ -19,10 +19,10 @@ module Pubsubstub
       request = Rack::Request.new(env)
       channels = (request.params['channels'] || [:default]).map(&Channel.method(:new))
 
-      stream = if event_machine?
-        send_scrollback(channels, last_event_id)
-      else
+      stream = if use_persistent_connections?
         subscribe_connection(channels, last_event_id)
+      else
+        send_scrollback(channels, last_event_id)
       end
       [200, HEADERS, stream]
     end
@@ -38,6 +38,10 @@ module Pubsubstub
           connection << event.to_message
         end
       end
+    end
+
+    def use_persistent_connections?
+      Pubsubstub.use_persistent_connections && !event_machine?
     end
 
     def event_machine?

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Pubsubstub::StreamAction do
+RSpec.describe Pubsubstub::StreamAction do
   let(:app) { Pubsubstub::PublishAction.new }
   let(:channel) { Pubsubstub::Channel.new('foo') }
 
