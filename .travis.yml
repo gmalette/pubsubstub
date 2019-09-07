@@ -1,6 +1,7 @@
 language: ruby
 rvm:
   - 2.2.2
+  - 2.6.3
 gemfile:
   - gemfiles/Gemfile.rack-1.x
   - gemfiles/Gemfile.rack-2.x
