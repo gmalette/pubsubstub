@@ -6,7 +6,7 @@ module HTTPHelpers
     queue = Queue.new
     Thread.start do
       begin
-        Net::HTTP.start(uri.host, uri.port) do |http|
+        Net::HTTP.start(uri.host, uri.port, open_timeout: 10) do |http|
           request = Net::HTTP::Get.new uri.request_uri
           headers.each do |name, value|
             request.add_field(name, value)
