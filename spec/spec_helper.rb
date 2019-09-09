@@ -5,7 +5,6 @@ require 'pry-byebug'
 require 'timecop'
 require 'thread'
 
-require_relative 'support/thread_debug'
 require_relative 'support/threading_matchers'
 require_relative 'support/http_helpers'
 
