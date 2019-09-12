@@ -31,7 +31,7 @@ module Pubsubstub
       # redis.client.call allow to bypass the client mutex
       # Since we now that the only other possible caller is blocking on reading the socket this is safe
       synchronize do
-        redis.client.call(['punsubscribe', pubsub_pattern])
+        redis._client.call(['punsubscribe', pubsub_pattern])
       end
     end
 

@@ -10,12 +10,17 @@ RSpec.describe Pubsubstub::Subscriber do
       subject.add_event_listener('plop', -> (event) { published_events << event })
       subscribe_thread = Thread.new { subject.start }
 
-      expect { subject.subscribed? }.to happen
+      expect { subject.subscribed? }.to happen.in_under(1)
 
       events.each(&channel.method(:publish))
 
+      expect { published_events.size == events.size }.to happen.in_under(2)
+
       subject.stop
-      expect { !subject.subscribed? }.to happen
+
+      subscribe_thread.join(2)
+
+      expect { ! subject.subscribed? }.to happen.in_under(1)
 
       expect(subscribe_thread).to complete
 

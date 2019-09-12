@@ -1,11 +1,12 @@
 source 'https://rubygems.org'
 
 gem 'rack', '~> 2.0'
-gem 'redis', '~> 3.0'
-gem "rspec", "3.1.0"
+gem 'redis', '~> 4.0'
+gem 'rspec', '~> 3.8'
 gem "pry-byebug"
+gem "byebug", '~> 10.0'
 gem "puma", "~> 3.4"
 gem "thin", "~> 1.6"
 gem "rack-test"
 gem "timecop"
-gem "rake", "~> 10.0"
+gem "rake"

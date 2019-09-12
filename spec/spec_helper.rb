@@ -19,7 +19,7 @@ Pubsubstub.logger.level = Logger::DEBUG
 # Fake EM
 module EventMachine
   extend self
-  
+
   def reactor_running?
     false
   end
@@ -36,4 +36,9 @@ RSpec.configure do |config|
   config.order = 'random'
 
   config.before(:each) { Redis.new(url: Pubsubstub.redis_url).flushdb }
+
+  # Clean threads after finish
+  config.after(:each) do
+    Thread.list.each { |thread| thread.join(0.5) if thread != Thread.current }
+  end
 end
