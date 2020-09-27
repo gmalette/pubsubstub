@@ -24,7 +24,7 @@ module Pubsubstub
       else
         send_scrollback(channels, last_event_id)
       end
-      [200, HEADERS, stream]
+      [200, HEADERS.dup, stream]
     end
 
     private
